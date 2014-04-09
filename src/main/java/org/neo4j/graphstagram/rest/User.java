@@ -51,7 +51,7 @@ public class User
             @PathParam("friend") String friend) {
 
         ExecutionResult result = cypherExecutor.getExecutionEngine()
-            .execute("MERGE (:User {name:{user}})-[r:FRIEND]->(:User {name:{friend}}) RETURN id(r) as id",
+            .execute("MATCH (user:User {name:{user}}), (friend:User {name:{friend}}) MERGE (user)-[r:FRIEND]->(friend) RETURN id(r) as id",
                     MapUtil.<String, Object>genericMap("user", user, "friend", friend));
         return (long) IteratorUtil.single(result.columnAs("id"));
     }
