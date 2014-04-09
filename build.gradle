@@ -21,6 +21,8 @@ dependencies {
     compile group: 'org.neo4j', name: 'neo4j-lucene-index', version: neo4jVersion
     compile group: 'org.neo4j', name: 'server-api', version: neo4jVersion             
     compile group: 'org.neo4j.app', name: 'neo4j-server', version: neo4jVersion             
+    compile group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion
+    compile group: 'com.fasterxml.jackson.jaxrs', name:'jackson-jaxrs-json-provider', version: '2.2.3'
 
     // spock dependencies
     compile "org.codehaus.groovy:groovy-all:2.2.1"
@@ -32,7 +34,6 @@ dependencies {
     testCompile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jVersion, classifier: 'tests'
     testCompile group: 'org.neo4j.app', name: 'neo4j-server', version: neo4jVersion
     testCompile group: 'org.neo4j.app', name: 'neo4j-server', version: neo4jVersion, classifier: 'tests'
-    testCompile group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion
     testCompile group: 'com.sun.jersey', name: 'jersey-client', version: jerseyVersion
     testCompile group: 'com.sun.jersey', name: 'jersey-json', version: jerseyVersion
 

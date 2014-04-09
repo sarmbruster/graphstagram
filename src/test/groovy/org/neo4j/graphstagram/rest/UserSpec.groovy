@@ -1,4 +1,4 @@
-package org.neo4j.sample.unmanaged
+package org.neo4j.graphstagram.rest
 
 import org.junit.ClassRule
 import org.neo4j.extension.spock.Neo4jServerResource
@@ -12,21 +12,13 @@ import spock.lang.Specification
  *
  * N.B. this spawns an ImpermanentGraphDatabase
  */
-class SampleUserExtensionIntegrationSpec extends Specification {
+class UserSpec extends Specification {
 
     @ClassRule
     @Shared
     Neo4jServerResource neo4j = new Neo4jServerResource(
-        thirdPartyJaxRsPackages: ["org.neo4j.sample.unmanaged": "/db"]
+        thirdPartyJaxRsPackages: ["org.neo4j.graphstagram.rest": "/db"]
     )
-
-    Index<Node> userIndex
-
-    def setup() {
-        neo4j.withTransaction {
-            userIndex = neo4j.graphDatabaseService.index().forNodes("users")
-        }
-    }
 
     def "should trivial test work"() {
         when:
@@ -49,24 +41,19 @@ class SampleUserExtensionIntegrationSpec extends Specification {
     def "should return a valid user list"() {
 
         given:
-        def stefanNode = createUser("Stefan")
-        def thomasNode = createUser("Thomas")
+        createUser("Stefan")
+        createUser("Thomas")
 
         when:
         def response = neo4j.http.GET("db/user")
 
         then:
         response.status()==200
-        response.entity=='{"user":[{"username":"Stefan"},{"username":"Thomas"}]}'
+        response.entity=='["Stefan","Thomas"]'
 
     }
 
-    Node createUser(String userName) {
-        neo4j.withTransaction {
-            Node node = neo4j.graphDatabaseService.createNode()
-            node.setProperty("username", userName)
-            userIndex.add(node, "username", node.getProperty("username"))
-            node
-        }
+    void createUser(String userName) {
+        "CREATE (:User {name:{name}})".cypher name:userName
     }
 }
