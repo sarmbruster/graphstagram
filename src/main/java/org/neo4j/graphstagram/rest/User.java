@@ -1,11 +1,7 @@
 package org.neo4j.graphstagram.rest;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.index.Index;
 import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.helpers.collection.MapUtil;
 import org.neo4j.server.database.CypherExecutor;
@@ -13,16 +9,11 @@ import org.neo4j.server.database.CypherExecutor;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
- * graphstagram for Neo4j rest extensions
- * <p/>
- * provides a REST interface for maintaining users.
+ * provides a REST interface for managing users.
  */
 @Path("/user")
 public class User
@@ -33,25 +24,6 @@ public class User
 
     @Context
     protected CypherExecutor cypherExecutor;
-
-    @GET
-    @Path("/test")
-    @Produces("text/plain")
-    public long doTest()
-    {
-
-        try (Transaction tx = graphDatabaseService.beginTx())
-        {
-            Index<Node> index = graphDatabaseService.index().forNodes( "users" );
-
-            Node node = graphDatabaseService.createNode();
-            String userName = "123";
-            node.setProperty( "username", userName );
-            index.add( node, "username", node.getProperty( "username" ) );
-            tx.success();
-            return node.getId();
-        }
-    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -74,13 +46,14 @@ public class User
 
     @PUT
     @Path("{user}/friend/{friend}")
-    public void createFriendship(
+    public long createFriendship(
             @PathParam("user") String user,
             @PathParam("friend") String friend) {
 
-        cypherExecutor.getExecutionEngine()
-            .execute("CREATE UNIQUE (:User {name:{user}})-[:FRIEND]->(:User {name:{friend})",
+        ExecutionResult result = cypherExecutor.getExecutionEngine()
+            .execute("MERGE (:User {name:{user}})-[r:FRIEND]->(:User {name:{friend}}) RETURN id(r) as id",
                     MapUtil.<String, Object>genericMap("user", user, "friend", friend));
+        return (long) IteratorUtil.single(result.columnAs("id"));
     }
 
 
